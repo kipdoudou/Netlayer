@@ -173,7 +173,7 @@ int main(int argc, char * argv[])
     tun = tuntap_create(dev);
 	if (tun < 0)
 	{
-		perror("!!!tun_create");
+		perror("tun_create");
 		return -1;
 	}
 
@@ -196,7 +196,7 @@ int main(int argc, char * argv[])
 		if (ret < 0)
             continue;
 		//2.26 3.30
-	//	DEBUG("tun read %d bytes\n", ret);
+		DEBUG("tun read %d bytes\n", ret);
 
 
 	
@@ -227,10 +227,10 @@ int main(int argc, char * argv[])
             memcpy(snd_buf.data, &(temp_eth[14]), ret - 14);    
 
 			protcl = *( (unsigned char *)(&(snd_buf.data[9])) );
-		//	EPT(stderr, "IP : PT: %hhu\n", (U8)protcl);
+			EPT(stderr, "IP : PT: %hhu\n", (U8)protcl);
 			
 			port = *( (unsigned short *)(&(snd_buf.data[20])) );
-		//	EPT(stderr, "IP : PORT: %hu\n", (U16)port);
+			EPT(stderr, "IP : PORT: %hu\n", (U16)port);
 			
 			if( (find_filter(protcl, 65535) == 1) || (find_filter(protcl,port) == 1) )	//port = -1,在哈希表中存的为65535
 			{
@@ -320,7 +320,7 @@ void *rcv_thread(void *arg)
 		ret = write(tun, snd_data, size + 13);//size -1 + 14
                 if (ret < 0) break;
 	//2.26 
-    //    DEBUG("  write to tun %d bytes\n", ret);
+        DEBUG("  write to tun %d bytes\n", ret);
 		#endif
 	}
 }
@@ -470,22 +470,16 @@ int decide_dest(char* buf_ptr)
 //2.26        DEBUG("this is a ip frame\n");
 	*/
         IP_HD *ip_hd = (IP_HD *)(buf_ptr + 14);
-        int dst1, dst2;
-        dst1 = ip_hd->ip_dst[2];
-        if (dst1 >= MADR_UNI_MIN && dst1 <= MADR_UNI_MAX)
+        int dst;
+        dst = ip_hd->ip_dst[2];
+        if (dst >= MADR_UNI_MIN && dst <= MADR_UNI_MAX)
 		{
-//2.26  	DEBUG("decide dst1 addr :%d\n",dst1);
-			return dst1;
-		}
-		else if(dst1 == 0)
-		{
-			dst2 = ip_hd->ip_dst[3];
-			if (dst2 >= MADR_UNI_MIN && dst2 <= MADR_UNI_MAX)
-				return dst2;
+//2.26  	DEBUG("decide dst addr :%d\n",dst);
+			return dst;
 		}
 		else
 		{
-			DEBUG("!!!WRONG dst addr :(dst1)%d (dst2)%d\n",dst1, dst2);
+			DEBUG("!!!WRONG dst addr :%d\n",dst);
 			return 0;
 		}
 	

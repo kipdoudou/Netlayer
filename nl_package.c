@@ -43,13 +43,13 @@ void init_package_head(nl_package_t* pkt,mmsg_t *msg)
 			/*65535: 端口号设置为-1的HtoNs后的数值*/
 			if( (Cos = find_Cos(protcl, 65535) )!= 255)			//-1 在U8下为1111 1111（255）
 			{
-	//			EPT(stderr,"1 Cos: %hhu\n", Cos);
+				EPT(stderr,"1 Cos: %hhu\n", Cos);
 				break;
 			}
 				
 			else if( (Cos = find_Cos(protcl, port)) != 255)
 			{
-	//			EPT(stderr,"2 Cos: %hhu\n", Cos);
+				EPT(stderr,"2 Cos: %hhu\n", Cos);
 				break;
 			}
 
@@ -57,7 +57,7 @@ void init_package_head(nl_package_t* pkt,mmsg_t *msg)
 				/*Cos默认（未找到classifier文件中相匹配的值）为3*/
 			{
 				Cos = 3;
-	//			EPT(stderr,"3 Cos: %hhu\n", Cos);
+				EPT(stderr,"3 Cos: %hhu\n", Cos);
 				break;
 			}	
 			
@@ -123,10 +123,23 @@ void init_package_head(nl_package_t* pkt,mmsg_t *msg)
 	set_TTL(pkt,ttl);
 	set_CoS(pkt,Cos);
 	set_ACK(pkt,ack);
+	set_SH(pkt, 1);
+	set_SSN(pkt, 0);
 	
 
 //deleted by wanghao on4.18
 // 	set_data_type(pkt,type);
+}
+
+void init_reseg_package_head(nl_package_t* pkt,mmsg_t *msg)
+{
+	U8 ttl;
+	
+	memcpy(pkt, msg, 8);
+	
+	ttl = get_TTL(pkt);
+	set_TTL(pkt,ttl - 1);
+	set_snd_addr(pkt,SRC_ADDR);
 }
 
 inline void set_PR(nl_package_t* pkt,U8 PR)
@@ -251,6 +264,26 @@ inline void set_SN(nl_package_t *pkt, U8 SN)
 inline U8 get_SN(nl_package_t *pkt)
 {
 	return pkt->SN;
+}
+
+inline void set_SH(nl_package_t *pkt, U8 SH)
+{
+	pkt->SH = H;
+}
+
+inline U8 get_SH(nl_package_t *pkt)
+{
+	return pkt->SH;
+}
+
+inline void set_SSN(nl_package_t *pkt, U8 SSN)
+{
+	pkt->SSN = SSN;
+}
+
+inline U8 get_SSN(nl_package_t *pkt)
+{
+	return pkt->SSN;
 }
 
 inline void set_TTL(nl_package_t *pkt, U8 ttl)

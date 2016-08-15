@@ -10,7 +10,6 @@ MADR SRC_ADDR;
 
 
 
-
 int main(int argc, char* argv[])  //参数是本节点地址
 {
 	if(argc < 2)
@@ -58,6 +57,12 @@ int main(int argc, char* argv[])  //参数是本节点地址
 		goto process_return;
 	}*/
 
+	rval = send_mtu2Hm();
+	if(rval == 0)
+	{
+		EPT(stderr, "!!!send mtu to HM wrong\n");
+	}
+
 	pthread_mutex_lock(&share.mutex);		//在其他线程出错的情况下，主线程结束阻塞开始退出
 	while(0 == stop) {
 		EPT(stderr, "netlayer: waiting for the exit of sub threads\n");
@@ -75,8 +80,10 @@ int main(int argc, char* argv[])  //参数是本节点地址
 	pthread_mutex_unlock(&share.mutex);
 
 process_return:
+	EPT(stderr,"!!!nl thread exit\n");
 	sleep(1);
 	mr_queues_delete();			//删除所有消息队列
 	exit(rval);					//退出进程
 }
+
 

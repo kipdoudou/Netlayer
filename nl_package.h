@@ -3,7 +3,7 @@
 
 #include "nl_common.h"
 
-#define MAX_PACKAGE_DATA_LENGTH		494
+
 
 
 #pragma pack(1)
@@ -35,6 +35,7 @@ typedef struct								//使用位域，能够减少出错
 
 //wanghao4 on 2.29 init_package_head中的rcv_addr需要在外部查询路由表获得之后再作为参数传进来
 void init_package_head(nl_package_t* pkt,mmsg_t *msg);
+void init_reseg_package_head(nl_package_t* pkt,mmsg_t *msg);
 
 inline void set_data_len(nl_package_t* pkt,U16 len);
 inline U16 get_data_len(nl_package_t* pkt);
@@ -71,6 +72,11 @@ inline void set_ACK(nl_package_t *pkt, U8 ack);
 inline U8 get_ACK(nl_package_t *pkt);
 inline void set_CRC(nl_package_t *pkt, U8 CRC);
 inline U8 get_CRC(nl_package_t *pkt);
+
+inline void set_SH(nl_package_t *pkt, U8 SH);
+inline U8 get_SH(nl_package_t *pkt);
+inline void set_SSN(nl_package_t *pkt, U8 SSN);
+inline U8 get_SSN(nl_package_t *pkt);
 
 //inline void set_data_type(nl_package_t *pkt,U16 data_type);
 //inline U16 get_data_type(nl_package_t *pkt);

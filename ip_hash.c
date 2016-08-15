@@ -248,13 +248,13 @@ void show_hash()
 
 int find_filter(U8 pt, U16 port)
 {
-	if(flag)
-		return -1;
-	
 	int key;
 	key = ip_find_key(pt, port);
 	
 //4.4	EPT(stderr, " Filter: find key:%d, pt:%d(%hhu), port:%d(%hu)\n", key, pt, pt, port, port);
+	
+	if(flag)
+		return -1;
 
 	if(hashTab[key].pt == 0)
 	{

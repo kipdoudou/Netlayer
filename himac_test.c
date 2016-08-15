@@ -19,7 +19,11 @@ typedef struct
 		//U8 CoS_ACK_Rev;
 		U8 CoS : 3;
 		U8 ACK : 1;
-		U8 Rev : 4;
+		
+		//U8 Rev : 4;
+		U8 SH : 1;
+		U8 SSN : 3;
+		
 		char data[1592];
 		//unsigned int CRC;
 }nl_package_t;

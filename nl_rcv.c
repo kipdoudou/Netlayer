@@ -19,6 +19,11 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 		rval = 1;
 		goto thread_return;
 	}
+	
+	//init mtu to each node
+	for(rval = 0; rval < MAX_NODE_CNT; rval ++)
+		mtu[rval] = MIN_MTU_GRADE;
+	
 
 	//测试pkt的存取和地址分配
 	/*nl_package_t * pkt;
@@ -120,6 +125,26 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 			nl_package_t * pkt = (nl_package_t *)rcv_msg.data;
 			combine_send_pkt(pkt, rcnt - sizeof(MADR));
 		}
+		else if(MMSG_RATE_DATA == rcv_msg.mtype)	//HighMAC发来的设置mtu的数据
+		{
+			if( (rcv_msg.node >= MADR_UNI_MIN) && (rcv_msg.node <= MADR_UNI_MAX) )
+			{
+				U8 set_mtu = rcv_msg.data[0];
+				if( (set_mtu >= 1) && (set_mtu <= speed_level) )
+				{
+					mtu[rcv_msg.node - 1] = mtu_grade[set_mtu - 1];
+					EPT(stderr,"! FOR TEST:set mtu[%d] = mtu_grade[%d]\n", rcv_msg.node - 1, set_mtu - 1);
+				}
+				else
+					EPT(stderr,"!!!ERROR: set_mtu:%d\n", set_mtu);
+			}
+			else
+				EPT(stderr,"!!!ERROR: MMSG_RATE_DATA 's node:%d\n", rcv_msg.node);
+		}
+		else if(MMSG_SEG_DATA == rcv_msg.mtype)					//HighMAC发来的需要再分段的数据
+		{
+			nl_reseg_to_himac(&rcv_msg, rcnt - sizeof(MADR));
+		}
 		else
 		{
 //2.26		    printf("ready to send to hihmac \n");
@@ -128,6 +153,7 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 			
 			nl_send_to_himac(&rcv_msg, rcnt - sizeof(MADR));
 		}
+		
 	}
 
 thread_return:
