@@ -14,15 +14,17 @@ typedef struct _nl_tshare_t {
 extern nl_tshare_t  share;
 extern MADR SRC_ADDR;
 
-extern int speed_level;
+
 extern U16 mtu_grade[MAX_SPEED_LEVEL];
-extern U16 mtu[MAX_NODE_CNT];
+
 
 //LowMAC在两板间发前边加4字节，后边CRC4字节，MAC帧头8字节。
 //总限制512，so 512-4-4-8 = 496
-#define MAX_PACKAGE_DATA_LENGTH		496
+#define MAX_PACKAGE_DATA_LENGTH		128
 
-#define MIN_MTU_GRADE 128
+
+#define MIN_MTU_GRADE 20
+#define MIN_MTU_DATA_LEN (MIN_MTU_GRADE - 16)
 
 int shm_init();
 int maodv_shm_init();

@@ -24,12 +24,14 @@ typedef struct								//使用位域，能够减少出错
 		U8 TTL : 4;
 		U8 SN : 4;		
 		//U8 CoS_ACK_Rev;					//ACK和REV在HIGHMAC部分处理
-		U8 Rev : 4;
+		//U8 Rev : 4;
+		U8 SSN : 3;
+		U8 SH : 1;
 		U8 ACK : 1;
 		U8 CoS : 3;		
 		
 		char data[MAX_PACKAGE_DATA_LENGTH];
-		unsigned int CRC;
+	//	unsigned int CRC;
 }nl_package_t;
 #pragma pack()
 
@@ -55,7 +57,7 @@ void find_and_set_rcv_addr(nl_package_t *pkt);
 inline U8 get_rcv_addr(nl_package_t *pkt);
 inline void set_snd_addr(nl_package_t* pkt,U8 addr);
 inline U8 get_snd_addr(nl_package_t *pkt);
-inline void set_SEQ(nl_package_t* pkt);
+inline void set_SEQ(nl_package_t* pkt, int i);
 inline U8 get_SEQ(nl_package_t *pkt);
 
 //帧头的SN和H内容需要在init_package_head函数之外设置,这里默认设置为H=1,SN=0,表示只有一个不分割帧

@@ -64,6 +64,7 @@
 //#define _MR_TEST						/* for routing protocol test(routing), this macro must be turned on */
 
 /* netlayer constants  */
+#define MAX_SPEED_LEVEL     10
 #define MAX_NODE_CNT		32			/* maximum number of network nodes */
 #define MAX_HOPS			10			/* maximum hops */
 #define MADR_UNI_MIN		1

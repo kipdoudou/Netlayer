@@ -315,7 +315,8 @@ void *rcv_thread(void *arg)
 			copy_ether_hd(snd_data, rcv_buff.node);
         	memcpy(&snd_data[14], rcv_buff.data, size -1); 
         }
-	
+	   
+       printf("rcv:%s\n", rcv_buff.data);
 		
 		ret = write(tun, snd_data, size + 13);//size -1 + 14
                 if (ret < 0) break;

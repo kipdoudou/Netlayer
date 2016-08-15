@@ -117,7 +117,7 @@ void init_package_head(nl_package_t* pkt,mmsg_t *msg)
 	find_and_set_rcv_addr(pkt);
 	set_snd_addr(pkt,SRC_ADDR);		//发送地址也设置为源地址
 	
-	set_SEQ(pkt);
+	set_SEQ(pkt, 1);
 	set_H(pkt,1);					//默认设置为完整帧不需要分割
 	set_SN(pkt,0);
 	set_TTL(pkt,ttl);
@@ -134,9 +134,7 @@ void init_package_head(nl_package_t* pkt,mmsg_t *msg)
 void init_reseg_package_head(nl_package_t* pkt,mmsg_t *msg)
 {
 	U8 ttl;
-	
-	memcpy(pkt, msg, 8);
-	
+	memcpy(pkt, msg->data, 8);
 	ttl = get_TTL(pkt);
 	set_TTL(pkt,ttl - 1);
 	set_snd_addr(pkt,SRC_ADDR);
@@ -233,12 +231,9 @@ inline U8 get_snd_addr(nl_package_t *pkt)
 	return pkt->snd_addr;
 }
 
-inline void set_SEQ(nl_package_t* pkt)
+inline void set_SEQ(nl_package_t* pkt , int i)
 {
-	if(seq > 127)
-		seq = 0;
-	pkt->SEQ = seq;
-	seq++;
+	pkt->SEQ = i;
 }
 
 inline U8 get_SEQ(nl_package_t *pkt)
@@ -268,7 +263,7 @@ inline U8 get_SN(nl_package_t *pkt)
 
 inline void set_SH(nl_package_t *pkt, U8 SH)
 {
-	pkt->SH = H;
+	pkt->SH = SH;
 }
 
 inline U8 get_SH(nl_package_t *pkt)

@@ -1,11 +1,14 @@
 #include "nl_rcv.h"
 
+extern int speed_level;
+extern U16 mtu[MAX_NODE_CNT];
 
 void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 {
 	int qid, rcnt;
 
 	int rval = 0;
+	
 
 	nl_buf_pool = (nl_buff_pool_t *)malloc(nl_buff_num * sizeof(nl_buff_pool_t));	//为处理pkt的可复用缓存队列申请空间
 
@@ -23,8 +26,6 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 	//init mtu to each node
 	for(rval = 0; rval < MAX_NODE_CNT; rval ++)
 		mtu[rval] = MIN_MTU_GRADE;
-	
-
 	//测试pkt的存取和地址分配
 	/*nl_package_t * pkt;
 	pkt = (nl_package_t *)malloc(sizeof(nl_package_t));
@@ -81,10 +82,14 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 	printf("length of data is : %d\n",strlen(test->data));*/
 	
 	mmsg_t rcv_msg;						  //该对象用于消息队列数据的直接存储，只需要一个rcvbuff
+	
+
 	while(1)
 	{
 	//    printf("===========nl_layer waiting for data from nl_layer==========\n");
 		memset(&rcv_msg, 0, sizeof(rcv_msg));								//接收缓存每次使用前清空，因为只有这一个接收缓存
+		
+		
 		rcnt = msgrcv(qid, &rcv_msg, sizeof(mmsg_t) - sizeof(long), 0, 0);	//成功返回拷贝到结构体数据部分的字节数,失败返回-1
 		if (rcnt < 0)
 		{
@@ -116,7 +121,13 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 		
 	//4.4	EPT(stderr, "#nl rcnt mtype: %ld \n",rcv_msg.mtype);
 	//4.4	EPT(stderr, "#nl rcnt: %d ",rcnt);
-
+		
+		char buff[20];
+		memcpy(buff, rcv_msg.data, rcnt-sizeof(MADR));
+		printf("rcv:");
+		printf("rcv: %s\n\n", buff);
+		fflush(stdout);
+		
 		if(MMSG_HM_DATA == rcv_msg.mtype)		        //如果是HMAC发来的,就进行重组处理,waiting for add MMSG_FT_REP
 		{
 		
@@ -143,6 +154,7 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 		}
 		else if(MMSG_SEG_DATA == rcv_msg.mtype)					//HighMAC发来的需要再分段的数据
 		{
+			EPT(stderr,"~~~~~nl rcv rsg package\n");
 			nl_reseg_to_himac(&rcv_msg, rcnt - sizeof(MADR));
 		}
 		else
@@ -150,6 +162,7 @@ void* nl_qrv_thread(void *arg)		  //参数为接收线程id
 //2.26		    printf("ready to send to hihmac \n");
 		
 		//4.4		EPT(stderr, "to HM\n");
+
 			
 			nl_send_to_himac(&rcv_msg, rcnt - sizeof(MADR));
 		}

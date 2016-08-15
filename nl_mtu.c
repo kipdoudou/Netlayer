@@ -4,19 +4,19 @@
 int speed_level = 0;
 U16 mtu_grade[MAX_SPEED_LEVEL];
 
-char fname[] = "/home/root/rata_config";
-int flag = 0;
+char f_name[] = "/home/root/rata_config";
+int flag_mtu = 0;
 
-int file_len()
+int mtu_file_len()
 {
 	FILE *fp_port = NULL;
 	char c;
 	int j = 0;
 
-	fp_port = fopen(fname, "r");
+	fp_port = fopen(f_name, "r");
 	if (NULL == fp_port)
 	{
-		EPT(stderr,"!!!! file: %s does't exist\n", fname);
+		EPT(stderr,"!!!! file: %s does't exist\n", f_name);
 		return -1;
 	}
 	else
@@ -37,7 +37,7 @@ int file_len()
 		EPT(stderr,"the size of file is %d\n", speed_level);
 		if(speed_level == 0)
 		{
-			EPT(stderr,"!!! file: %s does't have word\n", fname);
+			EPT(stderr,"!!! file: %s does't have word\n", f_name);
 			return 0;
 		}
 		return 1;
@@ -46,17 +46,17 @@ int file_len()
 	
 }
 
-int read_file()
+int read_mtu_file()
 {
 	int rval = 0;
 	FILE *fp_port = NULL;
 
-	fp_port = fopen(fname, "r");
+	fp_port = fopen(f_name, "r");
 	if (NULL == fp_port)
 	{
 		rval = 1;
 		goto fexit;
-	//	printf("~~~~~~does not exist file:%s\n",fname);
+	//	printf("~~~~~~does not exist file:%s\n",f_name);
 		
 	}
 	else
@@ -109,8 +109,8 @@ void sort_mtu(int bot, int end)
        temp = mtu_grade[bot];  
        mtu_grade[bot] = mtu_grade[j];  
        mtu_grade[j] = temp;  
-       quick_sort(mtu_grade,bot,j-1);  
-       quick_sort(mtu_grade,j+1,end);  
+       sort_mtu(bot,j-1);  
+       sort_mtu(j+1,end);  
     } 
 }
 
@@ -125,13 +125,13 @@ void show_mtu_grade()
 
 int init_mtu()
 {
-    if( file_len() == 1)
+    if( mtu_file_len() == 1)
     {
     	int i;
 		for(i = 0; i < MAX_SPEED_LEVEL; i++)
 			mtu_grade[i] = 0;
 
-		read_file();
+		read_mtu_file();
 
 		if(mtu_grade[0] == 0 && mtu_grade[1] == 0)//in case file start with\n
 		{
@@ -144,6 +144,6 @@ int init_mtu()
 		show_mtu_grade();  
 		return 1; 	
     }
-    flag = 1;
+    flag_mtu = 1;
     return 0;
 }
