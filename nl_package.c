@@ -43,13 +43,13 @@ void init_package_head(nl_package_t* pkt,mmsg_t *msg)
 			/*65535: 端口号设置为-1的HtoNs后的数值*/
 			if( (Cos = find_Cos(protcl, 65535) )!= 255)			//-1 在U8下为1111 1111（255）
 			{
-	//			EPT(stderr,"1 Cos: %hhu\n", Cos);
+				EPT(stderr,"1 Cos: %hhu\n", Cos);
 				break;
 			}
 				
 			else if( (Cos = find_Cos(protcl, port)) != 255)
 			{
-	//			EPT(stderr,"2 Cos: %hhu\n", Cos);
+				EPT(stderr,"2 Cos: %hhu\n", Cos);
 				break;
 			}
 
@@ -57,7 +57,7 @@ void init_package_head(nl_package_t* pkt,mmsg_t *msg)
 				/*Cos默认（未找到classifier文件中相匹配的值）为3*/
 			{
 				Cos = 3;
-	//			EPT(stderr,"3 Cos: %hhu\n", Cos);
+				EPT(stderr,"3 Cos: %hhu\n", Cos);
 				break;
 			}	
 			

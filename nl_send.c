@@ -100,10 +100,6 @@ int combine_send_pkt(nl_package_t * pkt, int length)
 		}
 
 		nl_send_to_others(snd_buf,len);
-		
-		//added by wanghao on 7.5 to clear the  [id].flag because recombine successfully
-		nl_buf_pool[pool_id].flag = 0;
-		
 		free(snd_buf);
 		snd_buf = NULL;
 	}
@@ -202,7 +198,7 @@ int nl_send_to_himac(mmsg_t *msg,int len)
 		case MMSG_MRPM:
 			snd_buf->mtype = MMSG_MP_DATA;
 			break;
-		case MMSG_FT_DATA:
+		case MMSG_RP_FT_DATA:
 			snd_buf->mtype = MMSG_FT_DATA;
 			break;
 		case MMSG_FT_REQ:
@@ -279,7 +275,7 @@ int nl_send_to_himac(mmsg_t *msg,int len)
         //printf("pkt data : %s\n",pkt->data + sizeof(mmhd_t));
 		
 		int size_for_snd = sizeof(MADR) + 8 + n;
-	//	EPT(stderr, "send to himac %d bytes\n", size_for_snd);
+		EPT(stderr, "send to himac %d bytes\n", size_for_snd);
 		
 		while(msgsnd(hm_qid, snd_buf, size_for_snd, 0) < 0)
 		{
@@ -317,7 +313,7 @@ int manage_nl_buf(int key, U8 src, U8 seq)				//管理nl_buff，输入key, src, seq，
 	if(nl_buf_pool[id].flag == 1 && nl_buf_pool[id].seq == seq && nl_buf_pool[id].src == src)		//先通过key%11快速查找
 	{
 		nl_buf_pool[id].time = ctime;
-	//	EPT(stderr,"Recombine1 find id:%d", id);
+		EPT(stderr,"Recombine1 find id:%d", id);
 		return id;
 	}
 	else															//如果查找的不是对应的seq、src组合，就轮询查找
@@ -327,7 +323,7 @@ int manage_nl_buf(int key, U8 src, U8 seq)				//管理nl_buff，输入key, src, seq，
 			if(nl_buf_pool[i].flag == 1 && nl_buf_pool[i].seq == seq && nl_buf_pool[i].src == src)
 			{
 				nl_buf_pool[i].time = ctime;
-	//			EPT(stderr,"Recombine2 find id:%d", i);
+				EPT(stderr,"Recombine2 find id:%d", i);
 				return i;
 			}
 		}
@@ -340,7 +336,7 @@ int manage_nl_buf(int key, U8 src, U8 seq)				//管理nl_buff，输入key, src, seq，
 		nl_buf_pool[id].src = src;
 		nl_buf_pool[id].flag = 1;
 		nl_buf_pool[id].time = ctime;
-	//	EPT(stderr,"Recombine3 set id:%d", id);
+		EPT(stderr,"Recombine3 set id:%d", id);
 		return id;
 	}
 
