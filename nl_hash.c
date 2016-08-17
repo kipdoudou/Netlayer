@@ -254,15 +254,15 @@ void show_hash()
 
 U8 find_Cos(U8 pt, U16 port)
 {
-	int key;
-	key = find_key(pt, port);
-	
-//	EPT(stderr, "~ nl find key: %d(pt: %hhu ,port: %hu)\n", key, pt, port);
-	
 	if(flag)
 	{
 		return -1;
 	}
+	
+	int key;
+	key = find_key(pt, port);
+	
+//	EPT(stderr, "~ nl find key: %d(pt: %hhu ,port: %hu)\n", key, pt, port);
 		
 
 	if(hashTab[key].Cos == 255)
@@ -292,6 +292,7 @@ U8 find_Cos(U8 pt, U16 port)
 
 int init_nl_hash()
 {
+	int rval;
 
     if( file_len() == 1)
     {

@@ -64,7 +64,6 @@
 //#define _MR_TEST						/* for routing protocol test(routing), this macro must be turned on */
 
 /* netlayer constants  */
-#define MAX_SPEED_LEVEL     10
 #define MAX_NODE_CNT		32			/* maximum number of network nodes */
 #define MAX_HOPS			10			/* maximum hops */
 #define MADR_UNI_MIN		1
@@ -130,9 +129,6 @@ typedef enum _MR_MSG_TYPE {
 	MMSG_FT_REP,								/* inquired forwarding table data from low mac */
 	MMSG_URT_DATA,								/* unicast route table */
 	MMSG_MRT_DATA,								/* multicast route table */
-	MMSG_RATE_DATA, 							/* himac tell nl the rate size */  /* added by kang*/
-	MMSG_SEG_DATA, 								/* himac tell nl the AAF segment frame */  /* added by kang*/
-	
 	/* highmac process */
 	MMSG_MP_DATA = MSG_HIGHMAC_BASE,			/* manet data packet */
 	MMSG_FT_DATA,								/* set forarding table from netlayer */
@@ -143,7 +139,6 @@ typedef enum _MR_MSG_TYPE {
 	MMSG_ST_REQ,								/* request slot table in low mac */
 	MMSG_LM_REQ,								/* request lowmac state */
 	MMSG_LM_STATE,								/* state info of low mac */
-	MMSG_MTU_DATA,								/* nl tell himac the mtu size */  /* added by kang*/	
 	/* if2tcpi process */
 	MMSG_REF_DATA = MSG_IF2TCPIP_BASE,			/* received ethernet frame */
 	MMSG_RIP_DATA,								/* received ip packet */

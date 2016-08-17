@@ -3,7 +3,7 @@
 
 #include "nl_common.h"
 
-
+#define MAX_PACKAGE_DATA_LENGTH		494
 
 
 #pragma pack(1)
@@ -24,20 +24,17 @@ typedef struct								//使用位域，能够减少出错
 		U8 TTL : 4;
 		U8 SN : 4;		
 		//U8 CoS_ACK_Rev;					//ACK和REV在HIGHMAC部分处理
-		//U8 Rev : 4;
-		U8 SSN : 3;
-		U8 SH : 1;
+		U8 Rev : 4;
 		U8 ACK : 1;
 		U8 CoS : 3;		
 		
 		char data[MAX_PACKAGE_DATA_LENGTH];
-	//	unsigned int CRC;
+		unsigned int CRC;
 }nl_package_t;
 #pragma pack()
 
 //wanghao4 on 2.29 init_package_head中的rcv_addr需要在外部查询路由表获得之后再作为参数传进来
 void init_package_head(nl_package_t* pkt,mmsg_t *msg);
-void init_reseg_package_head(nl_package_t* pkt,mmsg_t *msg);
 
 inline void set_data_len(nl_package_t* pkt,U16 len);
 inline U16 get_data_len(nl_package_t* pkt);
@@ -57,7 +54,7 @@ void find_and_set_rcv_addr(nl_package_t *pkt);
 inline U8 get_rcv_addr(nl_package_t *pkt);
 inline void set_snd_addr(nl_package_t* pkt,U8 addr);
 inline U8 get_snd_addr(nl_package_t *pkt);
-inline void set_SEQ(nl_package_t* pkt, int i);
+inline void set_SEQ(nl_package_t* pkt);
 inline U8 get_SEQ(nl_package_t *pkt);
 
 //帧头的SN和H内容需要在init_package_head函数之外设置,这里默认设置为H=1,SN=0,表示只有一个不分割帧
@@ -74,11 +71,6 @@ inline void set_ACK(nl_package_t *pkt, U8 ack);
 inline U8 get_ACK(nl_package_t *pkt);
 inline void set_CRC(nl_package_t *pkt, U8 CRC);
 inline U8 get_CRC(nl_package_t *pkt);
-
-inline void set_SH(nl_package_t *pkt, U8 SH);
-inline U8 get_SH(nl_package_t *pkt);
-inline void set_SSN(nl_package_t *pkt, U8 SSN);
-inline U8 get_SSN(nl_package_t *pkt);
 
 //inline void set_data_type(nl_package_t *pkt,U16 data_type);
 //inline U16 get_data_type(nl_package_t *pkt);

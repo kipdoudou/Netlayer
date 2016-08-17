@@ -8,9 +8,8 @@ typedef struct nl_buff
 {
 	U8 	number;
 	U8 	count;
-	U8 SSN_NUM;
-	int len[(MAX_DATA_LENGTH)/sizeof(nl_package_t) + 1];
-	char package[(MAX_DATA_LENGTH)/sizeof(nl_package_t) + 1][sizeof(nl_package_t)];
+	int len[(MAX_DATA_LENGTH-1)/sizeof(nl_package_t) + 1];
+	char package[(MAX_DATA_LENGTH-1)/sizeof(nl_package_t) + 1][sizeof(nl_package_t)];
 }nl_buff_t;
 
 typedef struct nl_buff_pool
@@ -25,11 +24,8 @@ typedef struct nl_buff_pool
 
 int combine_send_pkt(nl_package_t * pkt, int length);
 int manage_nl_buf(int key, U8 src, U8 seq);
-int nl_send_to_himac(mmsg_t *msg, int len);
-void nl_reseg_to_himac(mmsg_t *msg, int len);
+int nl_send_to_himac(mmsg_t *msg,int len);
 int nl_send_to_others(mmsg_t *snd_msg, U16 length);
 void set_nl2other_mtype(mmsg_t *snd_buf, nl_package_t *pkt);
-
-int send_mtu2Hm();
 
 #endif // NL_SEND_H

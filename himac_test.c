@@ -3,28 +3,25 @@
 typedef struct
 {
 		//U8 PR_TYPE_SubT;
-		U8 SubT : 4;
+		U8 PR : 2;
 		U8 TYPE : 2;
-		U8 PR : 2;	
+		U8 SubT : 4;
 		U8 rcv_addr;
 		U8 snd_addr;
 		U8 dst_addr;
 		U8 src_addr;
-		//U8 SEQ_H;		
-		U8 H : 1;
+		//U8 SEQ_H;
 		U8 SEQ : 7;
+		U8 H : 1;
 		//U8 SN_TTL;
+		U8 SN : 4;
 		U8 TTL : 4;
-		U8 SN : 4;		
-		//U8 CoS_ACK_Rev;					//ACK和REV在HIGHMAC部分处理
-		//U8 Rev : 4;
-		U8 SSN : 3;
-		U8 SH : 1;
+		//U8 CoS_ACK_Rev;
+		U8 CoS : 3;
 		U8 ACK : 1;
-		U8 CoS : 3;		
-		
+		U8 Rev : 4;
 		char data[1592];
-//		unsigned int CRC;
+		//unsigned int CRC;
 }nl_package_t;
 
 int main(int argc, char * argv[])
@@ -33,150 +30,11 @@ int main(int argc, char * argv[])
 	mmsg_t snd_buf;
 	mmsg_t rcv_buf;
 
-	snd_buf.mtype = MMSG_HM_DATA;
-	snd_buf.node = 1;
+	snd_buf.mtype = MMSG_MP_DATA;
+	snd_buf.node = 5;
 
 	mr_queues_init("highmac");
 
-	char str1[9] = "111111111";
-	char str2[9] = "222222222";
-	char str3[5] = "33333";
-
-	mmsg_t test_msg;
-	test_msg.mtype = MMSG_SEG_DATA;
-	nl_package_t * pkt = (nl_package_t *)test_msg.data;
-
-/*
-	pkt->PR = 0;
-	pkt->TYPE=0;
-	pkt->SubT = 1;
-	pkt->rcv_addr = 1;
-	pkt->snd_addr = 1;
-	pkt->dst_addr= 1;
-	pkt->src_addr = 1;
-	pkt->SEQ = 8;
-	pkt->H = 1;
-	pkt->SN = 1;
-	pkt->CoS = 2;
-	pkt->TTL = 7;
-	pkt->ACK = 0;
-	pkt->SH = 1;
-	pkt->SSN = 0;
-
-	memcpy(pkt->data, str1, 9);
-	while(msgsnd(nl_qid, &test_msg, 18, 0) < 0)
-	{
-		if (errno == EINTR)
-			continue;
-		else
-			{
-				EPT(stdout, "!!!!!!!!!!!!!!!!!------snd 1 to himac wrong------------\n");
-			}
-	}
-	
-
-	pkt->PR = 0;
-	pkt->TYPE=0;
-	pkt->SubT = 1;
-	pkt->rcv_addr = 1;
-	pkt->snd_addr = 1;
-	pkt->dst_addr= 1;
-	pkt->src_addr = 1;
-	pkt->SEQ = 8;
-	pkt->H = 0;
-	pkt->SN = 1;
-	pkt->CoS = 2;
-	pkt->TTL = 7;
-	pkt->ACK = 0;
-	pkt->SH = 1;
-	pkt->SSN = 0;	
-	memcpy(pkt->data, str2, 9);
-	while(msgsnd(nl_qid, &test_msg, 18, 0) < 0)
-	{
-		if (errno == EINTR)
-			continue;
-		else
-			{
-				EPT(stdout, "!!!!!!!!!!!!!!!!!------snd 2 to himac wrong------------\n");
-			}
-	}
-*/
-	pkt->PR = 0;
-	pkt->TYPE=0;
-	pkt->SubT = 1;
-	pkt->rcv_addr = 1;
-	pkt->snd_addr = 1;
-	pkt->dst_addr= 1;
-	pkt->src_addr = 1;
-	pkt->SEQ = 8;
-	pkt->H = 1;
-	pkt->SN = 2;
-	pkt->CoS = 2;
-	pkt->TTL = 7;
-	pkt->ACK = 0;
-	pkt->SH = 1;
-	pkt->SSN = 0;	
-	memcpy(pkt->data, str1, 9);
-	while(msgsnd(nl_qid, &test_msg, 18, 0) < 0)
-	{
-		if (errno == EINTR)
-			continue;
-		else
-			{
-				EPT(stdout, "!!!!!!!!!!!!!!!!!------snd 2 to himac wrong------------\n");
-			}
-	}
-
-	pkt->PR = 0;
-	pkt->TYPE=0;
-	pkt->SubT = 1;
-	pkt->rcv_addr = 1;
-	pkt->snd_addr = 1;
-	pkt->dst_addr= 1;
-	pkt->src_addr = 1;
-	pkt->SEQ = 8;
-	pkt->H = 0;
-	pkt->SN = 1;
-	pkt->CoS = 2;
-	pkt->TTL = 7;
-	pkt->ACK = 0;
-	pkt->SH = 1;
-	pkt->SSN = 0;	
-	memcpy(pkt->data, str2, 9);
-	while(msgsnd(nl_qid, &test_msg, 18, 0) < 0)
-	{
-		if (errno == EINTR)
-			continue;
-		else
-			{
-				EPT(stdout, "!!!!!!!!!!!!!!!!!------snd 2 to himac wrong------------\n");
-			}
-	}
-		pkt->PR = 0;
-	pkt->TYPE=0;
-	pkt->SubT = 1;
-	pkt->rcv_addr = 1;
-	pkt->snd_addr = 1;
-	pkt->dst_addr= 1;
-	pkt->src_addr = 1;
-	pkt->SEQ = 8;
-	pkt->H = 0;
-	pkt->SN = 2;
-	pkt->CoS = 2;
-	pkt->TTL = 7;
-	pkt->ACK = 0;
-	pkt->SH = 1;
-	pkt->SSN = 0;	
-	memcpy(pkt->data, str3, 5);
-	while(msgsnd(nl_qid, &test_msg, 14, 0) < 0)
-	{
-		if (errno == EINTR)
-			continue;
-		else
-			{
-				EPT(stdout, "!!!!!!!!!!!!!!!!!------snd 2 to himac wrong------------\n");
-			}
-	}
 
     int rcv_size ;
 	while (1)
@@ -206,11 +64,9 @@ int main(int argc, char * argv[])
 		printf("pkt H: %d\n",pkt->H);
 		printf("pkt SN: %d\n",pkt->SN);
 		printf("pkt CoS: %d\n",pkt->CoS);
-		printf("pkt SH: %d\n",pkt->SH);
-		printf("pkt SSN: %d\n",pkt->SSN);	
 
-		sleep(1);
-        printf("sleep 1s for send back\n");
+		sleep(3);
+        printf("sleep 3s for send back\n");
 
         printf("size of rcv data : %zu\n",strlen((char *)(rcv_buf.data)));
 
@@ -223,7 +79,7 @@ int main(int argc, char * argv[])
 
 
 
-        printf("himac send data = %s\n",&snd_buf.data[8]);
+        printf("himac send data = %s\n",snd_buf.data[12]);
 
 		int k = msgsnd(nl_qid, &snd_buf, rcv_size, 0);
 
