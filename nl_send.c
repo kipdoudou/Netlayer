@@ -21,7 +21,11 @@ int combine_send_pkt(nl_package_t * pkt, int length)
 		mmsg_t * snd_buf;
 		snd_buf = (mmsg_t *)malloc(sizeof(mmsg_t));
 		if (snd_buf == NULL)
+		{
 			EPT(stderr, "!!! malloc error when deal sigle pkt\n");
+			return;
+		}
+			
 		memset(snd_buf, 0, sizeof(snd_buf));
 
 		set_nl2other_mtype(snd_buf, pkt);
@@ -50,11 +54,9 @@ int combine_send_pkt(nl_package_t * pkt, int length)
 	seq = get_SEQ(pkt);
 	
 	int key = seq ^ src;
-	while(pool_id = manage_nl_buf(key, src, seq) == -1)
-	{
-		EPT(stderr, "order a nl_buf error!! maybe full used!!\n");
-		sleep(1);
-	}
+
+	pool_id = manage_nl_buf(key, src, seq);
+
 	pkt_buf =&(nl_buf_pool[pool_id].nl_buf);
 	/******************************************************重组pkt包************************************************************/
 	if (H == 1)
@@ -81,8 +83,11 @@ int combine_send_pkt(nl_package_t * pkt, int length)
 		mmsg_t * snd_buf;
 		snd_buf = (mmsg_t *)malloc(sizeof(mmsg_t));
 		if (snd_buf == NULL)
+		{
+			EPT(stderr, "!!! malloc error when combine pkt\n");
 			return;
-		
+		}
+
 		//added by wanghao on 4.18
 		set_nl2other_mtype(snd_buf,pkt);
 		
@@ -100,6 +105,10 @@ int combine_send_pkt(nl_package_t * pkt, int length)
 		}
 
 		nl_send_to_others(snd_buf,len);
+		
+		//added by wanghao on 7.5 to clear the  [id].flag because recombine successfully
+		nl_buf_pool[pool_id].flag = 0;
+		
 		free(snd_buf);
 		snd_buf = NULL;
 	}
@@ -147,7 +156,7 @@ int nl_send_to_others(mmsg_t *snd_msg, U16 length)
 		default:
 			printf("default qid = -1\n"); 
 			qid = -1;
-			break;
+			return -1;
 	}
 	
 //2.26	EPT(stdout, "~~~mtype:%ld qid:%d\n", snd_msg->mtype, qid);
@@ -158,7 +167,7 @@ int nl_send_to_others(mmsg_t *snd_msg, U16 length)
 			continue;
 		else
 			{
-				EPT(stdout, "%s:------snd to himac wrong------------\n", qinfs[re_qin].pname);
+				EPT(stdout, "%s:------snd to others wrong------------qid:%d\n", qinfs[re_qin].pname, qid);
 				return -1;
 			}
 	}
@@ -184,10 +193,13 @@ int nl_send_to_himac(mmsg_t *msg,int len)
 	snd_buf = (mmsg_t *)malloc(sizeof(mmsg_t));
 	
 	if (snd_buf == NULL)
+	{
 		EPT(stderr, "!!! malloc error when deal sigle pkt\n");
+		return;
+	}
 	memset(snd_buf, 0, sizeof(snd_buf));
 
-	//一共由三种类型，MMSG_IP_DATA，MMSG_RP_FT_DATA，MMSG_RPM,MMSG_MAODV,  MMSG_MP_DATA
+	//一共由三种类型，MMSG_FT_DATA, MMSG_MP_DATA, MMSG_FT_REQ
 	
 	switch(msg->mtype)
 	{
@@ -205,11 +217,11 @@ int nl_send_to_himac(mmsg_t *msg,int len)
 			snd_buf->mtype = MMSG_FT_REQ;
 			break;
 		default:
-			printf("!!!nl_msg->mtype_default:%ld\n",msg->mtype); 
+			EPT(stderr, "!!!nl_msg->mtype_default:%ld\n", msg->mtype); 
 			break;
 	}
 
-	EPT(stderr,"# NL_snd_buf->mtype:%ld\n",snd_buf->mtype);
+	EPT(stderr, "# NL_snd_buf->mtype:%ld from msg->mtype:%ld\n", snd_buf->mtype, msg->mtype);
 	
 	char *ptr = NULL;
 	int left,n;
@@ -305,7 +317,7 @@ int nl_send_to_himac(mmsg_t *msg,int len)
 
 int manage_nl_buf(int key, U8 src, U8 seq)				//管理nl_buff，输入key, src, seq，输出对应的buff_pool序号
 {
-	time_t 	ctime;
+	time_t 	ctime, oldest_time;
 	ctime = time(NULL);
 	int id = key % 11;
 	int i;
@@ -313,7 +325,7 @@ int manage_nl_buf(int key, U8 src, U8 seq)				//管理nl_buff，输入key, src, seq，
 	if(nl_buf_pool[id].flag == 1 && nl_buf_pool[id].seq == seq && nl_buf_pool[id].src == src)		//先通过key%11快速查找
 	{
 		nl_buf_pool[id].time = ctime;
-		EPT(stderr,"Recombine1 find id:%d", id);
+	//	EPT(stderr,"Recombine1 find id:%d", id);
 		return id;
 	}
 	else															//如果查找的不是对应的seq、src组合，就轮询查找
@@ -323,7 +335,7 @@ int manage_nl_buf(int key, U8 src, U8 seq)				//管理nl_buff，输入key, src, seq，
 			if(nl_buf_pool[i].flag == 1 && nl_buf_pool[i].seq == seq && nl_buf_pool[i].src == src)
 			{
 				nl_buf_pool[i].time = ctime;
-				EPT(stderr,"Recombine2 find id:%d", i);
+	//			EPT(stderr,"Recombine2 find id:%d", i);
 				return i;
 			}
 		}
@@ -336,26 +348,27 @@ int manage_nl_buf(int key, U8 src, U8 seq)				//管理nl_buff，输入key, src, seq，
 		nl_buf_pool[id].src = src;
 		nl_buf_pool[id].flag = 1;
 		nl_buf_pool[id].time = ctime;
-		EPT(stderr,"Recombine3 set id:%d", id);
+	//	EPT(stderr,"Recombine3 set id:%d", id);
 		return id;
 	}
-
-	for(i = 0;i < nl_buff_num; i++)									//key%11被占用则从0开始找一个可以放的
+	
+	int j = 0;
+	oldest_time = nl_buf_pool[0].time;							//key%11被占用则从0开始找一个最旧的
+	for(i = 0;i < nl_buff_num; i++)								
 	{
-		if(ctime - nl_buf_pool[i].time > nl_buff_timeout)
-			nl_buf_pool[i].flag = 0;
-		if(nl_buf_pool[i].flag == 0)								//如果找到空闲缓存则清空并预约这个缓存
+		if (nl_buf_pool[i].time < oldest_time)
 		{
-			memset(&nl_buf_pool[i], 0, sizeof(nl_buf_pool));
-			nl_buf_pool[i].seq = seq;
-			nl_buf_pool[i].src = src;
-			nl_buf_pool[i].flag = 1;
-			nl_buf_pool[i].time = ctime;
-			return i;
+			oldest_time = nl_buf_pool[i].time;
+			j = i;
 		}
 	}
+	memset(&nl_buf_pool[j], 0, sizeof(nl_buf_pool));			//清空并占用该缓存
+	nl_buf_pool[j].seq = seq;
+	nl_buf_pool[j].src = src;
+	nl_buf_pool[j].flag = 1;
+	nl_buf_pool[j].time = ctime;
+	return j;
 
-	return -1;
 }
 
 void set_nl2other_mtype(mmsg_t *snd_buf, nl_package_t *pkt)
